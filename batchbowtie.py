@@ -9,7 +9,7 @@ REF_SEQ_INDEX = 0
 
 
 def main():
-    ref_seq_file_list = get_ref_seq_file_list(CSV_FILE)
+    ref_seq_file_list = _get_ref_seq_file_list(CSV_FILE)
     index_builder_cmd_list = [INDEX_BUILDER]
     for ref_seq_file in ref_seq_file_list:
         index_builder_cmd_list.append(ref_seq_file)
@@ -17,7 +17,7 @@ def main():
         subprocess.run(index_builder_cmd_list)
 
 
-def get_ref_seq_file_list(csv_file_name):
+def _get_ref_seq_file_list(csv_file_name):
     ref_seq_file_list = []
     with open(csv_file_name) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
