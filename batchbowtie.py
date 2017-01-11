@@ -16,6 +16,7 @@ OUTPUT_FILE_FLAG = "-S"
 OUTPUT_FILE_PREFIX = "output"
 OUTPUT_FILE_EXT = ".sam"
 PROC_STDOUT_INDEX = 1
+OVERALL_ALIGNMENT_OUTPUT_INDEX = -2
 
 
 def main():
@@ -25,6 +26,7 @@ def main():
 
 
 def _align_reads():
+    consolidated_results_list = []
     with open(CSV_FILE) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         output_file_count = 1
@@ -35,8 +37,18 @@ def _align_reads():
                         READ_2_FLAG, row[READ_2_INDEX],
                         OUTPUT_FILE_FLAG, OUTPUT_FILE_PREFIX + str(output_file_count) + OUTPUT_FILE_EXT]
             proc = subprocess.Popen(run_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            print(proc.communicate()[PROC_STDOUT_INDEX])
+            overall_alignment_rate = _get_overall_alignment_rate(str(proc.communicate()[PROC_STDOUT_INDEX]))
+            consolidated_results_list.append([row[REF_SEQ_INDEX],
+                                              row[READ_1_INDEX],
+                                              row[READ_2_INDEX],
+                                              overall_alignment_rate])
             output_file_count += 1
+    print(consolidated_results_list)
+
+
+def _get_overall_alignment_rate(bowtie_stdout):
+    output_list = bowtie_stdout.split("\\n")
+    return output_list[OVERALL_ALIGNMENT_OUTPUT_INDEX]
 
 
 def _build_indexes():
