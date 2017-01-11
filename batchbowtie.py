@@ -15,10 +15,11 @@ READ_2_FLAG = "-2"
 OUTPUT_FILE_FLAG = "-S"
 OUTPUT_FILE_PREFIX = "output"
 OUTPUT_FILE_EXT = ".sam"
+PROC_STDOUT_INDEX = 1
 
 
 def main():
-    _build_indexes()
+    # _build_indexes()
     _align_reads()
     #_clean_up()
 
@@ -26,24 +27,25 @@ def main():
 def _align_reads():
     with open(CSV_FILE) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
-        output_file_count = 0
+        output_file_count = 1
         for row in csv_reader:
             index_name = _get_substr_before('.', row[REF_SEQ_INDEX])
-            bowtie_cmd_list = [ALIGNER, REF_SEQ_FLAG, index_name,
-                               READ_1_FLAG, row[READ_1_INDEX],
-                               READ_2_FLAG, row[READ_2_INDEX],
-                               OUTPUT_FILE_FLAG, OUTPUT_FILE_PREFIX+str(output_file_count)+OUTPUT_FILE_EXT]
-            subprocess.run(bowtie_cmd_list)
+            run_args = [ALIGNER, REF_SEQ_FLAG, index_name,
+                        READ_1_FLAG, row[READ_1_INDEX],
+                        READ_2_FLAG, row[READ_2_INDEX],
+                        OUTPUT_FILE_FLAG, OUTPUT_FILE_PREFIX + str(output_file_count) + OUTPUT_FILE_EXT]
+            proc = subprocess.Popen(run_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            print(proc.communicate()[PROC_STDOUT_INDEX])
             output_file_count += 1
 
 
 def _build_indexes():
     ref_seq_file_list = _get_ref_seq_file_list(CSV_FILE)
-    index_builder_cmd_list = [INDEX_BUILDER]
+    run_args = [INDEX_BUILDER]
     for ref_seq_file in ref_seq_file_list:
-        index_builder_cmd_list.append(ref_seq_file)
-        index_builder_cmd_list.append(_get_substr_before('.', ref_seq_file))
-        subprocess.run(index_builder_cmd_list)
+        run_args.append(ref_seq_file)
+        run_args.append(_get_substr_before('.', ref_seq_file))
+        subprocess.run(run_args)
 
 
 def _get_ref_seq_file_list(csv_file_name):
