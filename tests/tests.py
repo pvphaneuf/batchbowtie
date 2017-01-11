@@ -1,7 +1,7 @@
 import unittest
 import os
 from batchbowtie import _get_ref_seq_file_list
-from batchbowtie import _get_index_name
+from batchbowtie import _get_substr_before
 
 class Tests(unittest.TestCase):
 
@@ -13,6 +13,6 @@ class Tests(unittest.TestCase):
 
     def test_get_index_name(self):
         ref_seq_file = "nc000913.fa"
-        returned = _get_index_name(ref_seq_file)
+        returned = _get_substr_before('.', ref_seq_file)
         expected = "nc000913"
         self.assertEquals(returned, expected)
