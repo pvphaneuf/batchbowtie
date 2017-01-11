@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import csv
 import subprocess
+import os
 
 
 CSV_FILE = "to_qc.csv"
@@ -20,9 +21,23 @@ OVERALL_ALIGNMENT_OUTPUT_INDEX = -2
 
 
 def main():
-    # _build_indexes()
-    _align_reads()
-    #_clean_up()
+    _build_indexes()
+    consolidated_results_list = _align_reads()
+    _make_summary(consolidated_results_list)
+    _clean_up()
+
+
+def _clean_up():
+    for file_name in os.listdir('.'):
+        if file_name.endswith(".bt2") or file_name.endswith(".sam"):
+            subprocess.run(["rm", file_name])
+
+
+def _make_summary(consolidated_results_list):
+    with open("summary.csv", 'w', newline='') as consolidated_results:
+        csv_writer = csv.writer(consolidated_results, delimiter=',')
+        for row in consolidated_results_list:
+            csv_writer.writerow(row)
 
 
 def _align_reads():
@@ -43,7 +58,7 @@ def _align_reads():
                                               row[READ_2_INDEX],
                                               overall_alignment_rate])
             output_file_count += 1
-    print(consolidated_results_list)
+    return consolidated_results_list
 
 
 def _get_overall_alignment_rate(bowtie_stdout):
